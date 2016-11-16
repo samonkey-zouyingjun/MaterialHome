@@ -16,9 +16,10 @@
 
 package com.antonioleiva.materializeyourapp;
 
-public class ViewModel {
+public class ViewModel implements RecyclerViewAdapter.Item {
     private String text;
     private String image;
+    private int TYPE = 2;
 
     public ViewModel(String text, String image) {
         this. text = text;
@@ -31,5 +32,10 @@ public class ViewModel {
 
     public String getImage() {
         return image;
+    }
+
+    @Override
+    public int getType() {
+        return TYPE;
     }
 }

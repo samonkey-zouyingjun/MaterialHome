@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -39,6 +40,7 @@ import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.antonioleiva.materializeyourapp.listener.OnRecyclerViewScrollListener;
 import com.antonioleiva.materializeyourapp.picasso.CircleTransform;
 import com.lzp.floatingactionbuttonplus.FabTagLayout;
 import com.lzp.floatingactionbuttonplus.FloatingActionButtonPlus;
@@ -56,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     public static final String AVATAR_URL = "http://lorempixel.com/200/200/people/1/";
 
     private List<ViewModel> items = new ArrayList<>();
+    private ArrayList<ViewModel> arrayList;
 
 
 //    static {
@@ -78,6 +81,16 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     private boolean isLoading;
     private RecyclerViewAdapter mAdapter;
     private GridLayoutManager mLayoutManager;
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            List<ViewModel> list = (List<ViewModel>) msg.obj;
+            mAdapter.getList().addAll(list);
+            mAdapter.notifyDataSetChanged();
+            mAdapter.setFooterView(0);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,20 +146,18 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     }
 
     private void getNewData() {
-        List<ViewModel> items = new ArrayList<>();
         for (int i = 6; i <= 10; i++) {
             items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
         }
-        mAdapter.setList(items);
+        mAdapter.notifyDataSetChanged();
         mSwipeRefresh.setRefreshing(false);
     }
 
     private void getData() {
-        List<ViewModel> items = new ArrayList<>();
         for (int i = 1; i <= 5; i++) {
             items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
         }
-        mAdapter.setList(items);
+        mAdapter.notifyDataSetChanged();
         mSwipeRefresh.setRefreshing(false);
 
     }
@@ -173,36 +184,40 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
         mLayoutManager = new GridLayoutManager(this, 2);
         recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new OnRecyclerViewScrollListener<ViewModel>() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
+            public void onStart() {
+                mAdapter.setFooterView(R.layout.item_foot);
+                if (mAdapter.hasHeader()) {
+                    recyclerView.smoothScrollToPosition(mAdapter.getItemCount() + 1);
+                } else {
+                    recyclerView.smoothScrollToPosition(mAdapter.getItemCount());
+                }
             }
 
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-
-                int lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
-                if (lastVisibleItemPosition + 1 == mAdapter.getItemCount()) {
-
-                    boolean isRefreshing = mSwipeRefresh.isRefreshing();
-                    if (isRefreshing) {
-                        mAdapter.notifyItemRemoved(mAdapter.getItemCount());
-                        return;
+            public void onLoadMore() {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Log.e("TAG", "模拟网络请求数据");
+                            Thread.sleep(5000);
+                            //手动调用onFinish()
+                            onFinish(arrayList);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    if (!isLoading) {
-                        isLoading = true;
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                getData();
-                                Log.d("test", "load more completed");
-                                isLoading = false;
-                            }
-                        }, 1000);
-                    }
-                }
+                }).start();
+            }
+
+            @Override
+            public void onFinish(List<ViewModel> contents) {
+                Message message = Message.obtain();
+                message.obj = contents;
+                mHandler.sendMessage(message);
+                setLoadingMore(false);
             }
         });
 
@@ -212,12 +227,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         mAdapter = new RecyclerViewAdapter(items);
         mAdapter.setOnItemClickListener(this);
         recyclerView.setAdapter(mAdapter);
-        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                return (mAdapter.isBottomView(position)) ? mLayoutManager.getSpanCount() : 1;
-            }
-        });
+        arrayList = new ArrayList<ViewModel>(mAdapter.getList());
+
     }
 
     private void initFab() {
@@ -257,11 +268,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
                 Snackbar.make(content, "Click btn" + position, Snackbar.LENGTH_SHORT).show();
             }
         });
-//        findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
-//            @Override public void onClick(View v) {
-//                Snackbar.make(content, "FAB Clicked", Snackbar.LENGTH_SHORT).show();
-//            }
-//        });
     }
 
     private void initToolbar() {

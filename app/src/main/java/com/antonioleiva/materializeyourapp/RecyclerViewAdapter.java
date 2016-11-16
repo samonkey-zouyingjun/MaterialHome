@@ -24,94 +24,57 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.antonioleiva.materializeyourapp.adapter.GridLayoutAdapter;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements View.OnClickListener {
+public class RecyclerViewAdapter extends GridLayoutAdapter<ViewModel> implements View.OnClickListener {
 
 
-    //item类型
-    public static final int ITEM_TYPE_CONTENT = 1;
-    public static final int ITEM_TYPE_BOTTOM = 2;
-    private List<ViewModel> items;
     private OnItemClickListener onItemClickListener;
-    private int mHeaderCount = 1;//头部View个数
-    private int mBottomCount = 1;//底部View个数
 
-    public RecyclerViewAdapter(List<ViewModel> items) {
-        this.items = items;
+    public RecyclerViewAdapter(List list) {
+        super(list);
+    }
+
+    public RecyclerViewAdapter(List list, int headerViewRes) {
+        super(list, headerViewRes);
+    }
+
+    public RecyclerViewAdapter(List list, int headerViewRes, int footerViewRes) {
+        super(list, headerViewRes, footerViewRes);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
-    //内容长度
-    public int getContentItemCount() {
-        return items.size();
-    }
-
-    //判断当前item是否是HeadView
-    public boolean isHeaderView(int position) {
-        return mHeaderCount != 0 && position < mHeaderCount;
-    }
-
-    //判断当前item是否是FooterView
-    public boolean isBottomView(int position) {
-        return mBottomCount != 0 && position >= getContentItemCount();
+    @Override
+    public RecyclerView.ViewHolder onCreateHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_recycler, parent, false);
+        view.setOnClickListener(this);
+        return new RecyclerViewAdapter.ItemViewHolder(view);
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    protected void onBindHeaderView(View headerView) {
 
-        if (viewType == ITEM_TYPE_CONTENT) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_recycler, parent, false);
-            v.setOnClickListener(this);
-            return new ItemViewHolder(v);
-        } else if (viewType == ITEM_TYPE_BOTTOM) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_foot, parent,
-                    false);
-            return new BottomViewHolder(view);
-        }
-        return null;
+
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (holder instanceof ItemViewHolder) {
-            ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
-            ViewModel item = items.get(position);
-            itemViewHolder.text.setText(item.getText());
-            itemViewHolder.image.setImageBitmap(null);
-            Picasso.with(itemViewHolder.image.getContext()).load(item.getImage()).into(itemViewHolder.image);
-            holder.itemView.setTag(item);
-        }
+    protected void onBindFooterView(View footerView) {
 
-    }
-
-    public void setList(List<ViewModel> list) {
-        items.clear();
-        items.addAll(list);
-        notifyDataSetChanged();
-    }
-
-    //判断当前item类型
-    @Override
-    public int getItemViewType(int position) {
-        int dataItemCount = getContentItemCount();
-        if (mBottomCount != 0 && position >= dataItemCount) {
-            //底部View
-            return ITEM_TYPE_BOTTOM;
-        } else {
-            //内容View
-            return ITEM_TYPE_CONTENT;
-        }
     }
 
     @Override
-    public int getItemCount() {
-        return getContentItemCount() + mBottomCount;
+    protected void onBindItemView(RecyclerView.ViewHolder holder, ViewModel item) {
+        RecyclerViewAdapter.ItemViewHolder itemViewHolder = (RecyclerViewAdapter.ItemViewHolder) holder;
+        itemViewHolder.text.setText(item.getText());
+        itemViewHolder.image.setImageBitmap(null);
+        Picasso.with(itemViewHolder.image.getContext()).load(item.getImage()).into(itemViewHolder.image);
+        holder.itemView.setTag(item);
 
     }
 
@@ -131,19 +94,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         }
     }
 
-    //头部 ViewHolder
-    public static class HeaderViewHolder extends RecyclerView.ViewHolder {
-        public HeaderViewHolder(View itemView) {
-            super(itemView);
-        }
-    }
-
-    //底部 ViewHolder
-    public static class BottomViewHolder extends RecyclerView.ViewHolder {
-        public BottomViewHolder(View itemView) {
-            super(itemView);
-        }
-    }
 
     public interface OnItemClickListener {
 
