@@ -36,6 +36,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.antonioleiva.materializeyourapp.widgets.ExpandableTextView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -44,6 +45,7 @@ public class DetailActivity extends AppCompatActivity {
     private static final String EXTRA_IMAGE = "com.antonioleiva.materializeyourapp.extraImage";
     private static final String EXTRA_TITLE = "com.antonioleiva.materializeyourapp.extraTitle";
     private CollapsingToolbarLayout collapsingToolbarLayout;
+    private ExpandableTextView mExpandableTextView;
 
     public static void navigate(AppCompatActivity activity, View transitionImage, ViewModel viewModel) {
         Intent intent = new Intent(activity, DetailActivity.class);
@@ -55,7 +57,8 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("ConstantConditions")
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initActivityTransitions();
         setContentView(R.layout.activity_detail);
@@ -71,9 +74,13 @@ public class DetailActivity extends AppCompatActivity {
         collapsingToolbarLayout.setTitle(itemTitle);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
+        mExpandableTextView= (ExpandableTextView) findViewById(R.id.description);
+        mExpandableTextView.setText(getResources().getString(R.string.lorem_ipsum));
+
         final ImageView image = (ImageView) findViewById(R.id.image);
         Picasso.with(this).load(getIntent().getStringExtra(EXTRA_IMAGE)).into(image, new Callback() {
-            @Override public void onSuccess() {
+            @Override
+            public void onSuccess() {
                 Bitmap bitmap = ((BitmapDrawable) image.getDrawable()).getBitmap();
                 Palette.from(bitmap).generate(new Palette.PaletteAsyncListener() {
                     public void onGenerated(Palette palette) {
@@ -82,7 +89,8 @@ public class DetailActivity extends AppCompatActivity {
                 });
             }
 
-            @Override public void onError() {
+            @Override
+            public void onError() {
 
             }
         });
@@ -91,7 +99,8 @@ public class DetailActivity extends AppCompatActivity {
         title.setText(itemTitle);
     }
 
-    @Override public boolean dispatchTouchEvent(MotionEvent motionEvent) {
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent motionEvent) {
         try {
             return super.dispatchTouchEvent(motionEvent);
         } catch (NullPointerException e) {
