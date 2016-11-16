@@ -16,8 +16,10 @@
 
 package com.antonioleiva.materializeyourapp;
 
+import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -29,6 +31,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 
 import com.antonioleiva.materializeyourapp.picasso.CircleTransform;
@@ -46,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
 
     private static List<ViewModel> items = new ArrayList<>();
 
+
     static {
         for (int i = 1; i <= 10; i++) {
             items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
@@ -57,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     private RecyclerView recyclerView;
     private NavigationView navigationView;
     private FloatingActionButtonPlus mActionButtonPlus;
+    private ImageView mAvatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,16 +73,21 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         initFab();
         initToolbar();
         setupDrawerLayout();
-
         content = findViewById(R.id.content);
-
-        final ImageView avatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
-        Picasso.with(this).load(AVATAR_URL).transform(new CircleTransform()).into(avatar);
-
+        mAvatar = (ImageView) navigationView.getHeaderView(0).findViewById(R.id.avatar);
+        Picasso.with(this).load(AVATAR_URL).transform(new CircleTransform()).into(mAvatar);
+        mAvatar.setOnClickListener(mOnClickListener);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             setRecyclerAdapter(recyclerView);
         }
     }
+
+    View.OnClickListener mOnClickListener=new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+        }
+    };
 
     @Override
     public void onEnterAnimationComplete() {
@@ -102,6 +113,35 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         mActionButtonPlus.setOnItemClickListener(new FloatingActionButtonPlus.OnItemClickListener() {
             @Override
             public void onItemClick(FabTagLayout tagView, int position) {
+                TranslateAnimation translate = new TranslateAnimation(0,0,0,-95);
+                translate.setDuration(250);
+                translate.setFillAfter(true);
+                translate.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                TranslateAnimation translate = new TranslateAnimation(0,0,0,0);
+                                translate.setDuration(180);
+                                translate.setFillAfter(true);
+                                mActionButtonPlus.startAnimation(translate);
+                            }
+                        },1650);
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                mActionButtonPlus.offsetTopAndBottom(-mActionButtonPlus.getHeight() / 2);
+                mActionButtonPlus.startAnimation(translate);
                 Snackbar.make(content, "Click btn" + position, Snackbar.LENGTH_SHORT).show();
             }
         });
