@@ -17,6 +17,7 @@
 package com.antonioleiva.materializeyourapp;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -82,10 +83,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         }
     }
 
-    View.OnClickListener mOnClickListener=new View.OnClickListener() {
+    /**
+     * 点击头像事件
+     */
+    View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
         }
     };
 
@@ -113,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         mActionButtonPlus.setOnItemClickListener(new FloatingActionButtonPlus.OnItemClickListener() {
             @Override
             public void onItemClick(FabTagLayout tagView, int position) {
-                TranslateAnimation translate = new TranslateAnimation(0,0,0,-95);
+                TranslateAnimation translate = new TranslateAnimation(0, 0, 0, -95);
                 translate.setDuration(250);
                 translate.setFillAfter(true);
                 translate.setAnimationListener(new Animation.AnimationListener() {
@@ -127,12 +132,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                TranslateAnimation translate = new TranslateAnimation(0,0,0,0);
+                                TranslateAnimation translate = new TranslateAnimation(0, 0, 0, 0);
                                 translate.setDuration(180);
                                 translate.setFillAfter(true);
                                 mActionButtonPlus.startAnimation(translate);
                             }
-                        },1650);
+                        }, 1650);
                     }
 
                     @Override
