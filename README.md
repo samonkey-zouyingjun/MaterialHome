@@ -1,21 +1,9 @@
-# Materialize Your App
-
-This app was the base example for a talk I did at [MaterialFest](http://materialfest.com/) on January 31st, 2015.
-
-After that, I've used this example in some other articles:
-
-- [Materialize your App](http://antonioleiva.com/materialize-app/)
-- [Design Support Library (I): Navigation View](http://antonioleiva.com/navigation-view/)
-- [Design Support Library (II): Floating Action Button](http://antonioleiva.com/floating-action-button/)
-- [Design Support Library (III): Coordinator Layout](http://antonioleiva.com/coordinator-layout/)
-- [Design Support Library (IV): Collapsing Toolbar Layout](http://antonioleiva.com/collapsing-toolbar-layout/)
-- [Layout animations on RecyclerView](http://antonioleiva.com/layout-animations-on-recyclerview/)
-
-[More info and tutorials @ antonioleiva.com](http://antonioleiva.com/)
+#
+项目主要是基于http://antonioleiva.com/materialize-app/  这个App写的 在原来的基础上增加了些内容
 
 #License
 
-    Copyright 2015 Antonio Leiva
+    Copyright 2016 HFS
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
