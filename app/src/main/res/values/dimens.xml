@@ -29,4 +29,8 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_size_normal">100dp</dimen>
     <dimen name="text_size">12sp</dimen>
+
+    <dimen name="textSize_title">20sp</dimen>
+    <dimen name="textSize_normal">16sp</dimen>
+    <dimen name="textSize_small">14sp</dimen>
 </resources>

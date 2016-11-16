@@ -39,4 +39,6 @@
     <string name="next">NEXT</string>
     <string name="register">REGISTER</string>
 
+    <string name="loading">加载中…</string>
+
 </resources>

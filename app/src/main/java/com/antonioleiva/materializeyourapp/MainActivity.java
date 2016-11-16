@@ -16,7 +16,6 @@
 
 package com.antonioleiva.materializeyourapp;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,11 +24,13 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -46,19 +47,25 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 
 public class MainActivity extends AppCompatActivity implements RecyclerViewAdapter.OnItemClickListener {
 
     public static final String AVATAR_URL = "http://lorempixel.com/200/200/people/1/";
 
-    private static List<ViewModel> items = new ArrayList<>();
+    private List<ViewModel> items = new ArrayList<>();
 
 
-    static {
-        for (int i = 1; i <= 10; i++) {
-            items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
-        }
-    }
+//    static {
+//        for (int i = 1; i <= 10; i++) {
+//            items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
+//        }
+//    }
+
+    @InjectView(R.id.swipe_refresh)
+    SwipeRefreshLayout mSwipeRefresh;
 
     private DrawerLayout drawerLayout;
     private View content;
@@ -66,15 +73,20 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     private NavigationView navigationView;
     private FloatingActionButtonPlus mActionButtonPlus;
     private ImageView mAvatar;
-
     private long mExitTime;
+    private Handler handler = new Handler();
+    private boolean isLoading;
+    private RecyclerViewAdapter mAdapter;
+    private GridLayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ButterKnife.inject(this);
+        initData();
         initRecyclerView();
+        initView();
         initFab();
         initToolbar();
         setupDrawerLayout();
@@ -85,6 +97,58 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             setRecyclerAdapter(recyclerView);
         }
+    }
+
+    private void initData() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getData();
+            }
+        }, 1500);
+
+    }
+
+    private void initView() {
+        mSwipeRefresh.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);
+        mSwipeRefresh.post(new Runnable() {
+            @Override
+            public void run() {
+                mSwipeRefresh.setRefreshing(true);
+            }
+        });
+
+        mSwipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        items.clear();
+                        getNewData();
+                    }
+                }, 2000);
+            }
+        });
+    }
+
+    private void getNewData() {
+        List<ViewModel> items = new ArrayList<>();
+        for (int i = 6; i <= 10; i++) {
+            items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
+        }
+        mAdapter.setList(items);
+        mSwipeRefresh.setRefreshing(false);
+    }
+
+    private void getData() {
+        List<ViewModel> items = new ArrayList<>();
+        for (int i = 1; i <= 5; i++) {
+            items.add(new ViewModel("Item " + i, "http://lorempixel.com/500/500/animals/" + i));
+        }
+        mAdapter.setList(items);
+        mSwipeRefresh.setRefreshing(false);
+
     }
 
     /**
@@ -107,14 +171,53 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
 
     private void initRecyclerView() {
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        mLayoutManager = new GridLayoutManager(this, 2);
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                int lastVisibleItemPosition = mLayoutManager.findLastVisibleItemPosition();
+                if (lastVisibleItemPosition + 1 == mAdapter.getItemCount()) {
+
+                    boolean isRefreshing = mSwipeRefresh.isRefreshing();
+                    if (isRefreshing) {
+                        mAdapter.notifyItemRemoved(mAdapter.getItemCount());
+                        return;
+                    }
+                    if (!isLoading) {
+                        isLoading = true;
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                getData();
+                                Log.d("test", "load more completed");
+                                isLoading = false;
+                            }
+                        }, 1000);
+                    }
+                }
+            }
+        });
 
     }
 
     private void setRecyclerAdapter(RecyclerView recyclerView) {
-        RecyclerViewAdapter adapter = new RecyclerViewAdapter(items);
-        adapter.setOnItemClickListener(this);
-        recyclerView.setAdapter(adapter);
+        mAdapter = new RecyclerViewAdapter(items);
+        mAdapter.setOnItemClickListener(this);
+        recyclerView.setAdapter(mAdapter);
+        mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return (mAdapter.isBottomView(position)) ? mLayoutManager.getSpanCount() : 1;
+            }
+        });
     }
 
     private void initFab() {
@@ -207,7 +310,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if ((System.currentTimeMillis() - mExitTime) > 2000) {
-                Object mHelperUtils;
                 Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
                 mExitTime = System.currentTimeMillis();
 
