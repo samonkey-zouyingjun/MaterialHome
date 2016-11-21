@@ -236,35 +236,6 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
         mActionButtonPlus.setOnItemClickListener(new FloatingActionButtonPlus.OnItemClickListener() {
             @Override
             public void onItemClick(FabTagLayout tagView, int position) {
-                TranslateAnimation translate = new TranslateAnimation(0, 0, 0, -95);
-                translate.setDuration(250);
-                translate.setFillAfter(true);
-                translate.setAnimationListener(new Animation.AnimationListener() {
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-
-                    }
-
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                TranslateAnimation translate = new TranslateAnimation(0, 0, 0, 0);
-                                translate.setDuration(180);
-                                translate.setFillAfter(true);
-                                mActionButtonPlus.startAnimation(translate);
-                            }
-                        }, 1650);
-                    }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-
-                    }
-                });
-                mActionButtonPlus.offsetTopAndBottom(-mActionButtonPlus.getHeight() / 2);
-                mActionButtonPlus.startAnimation(translate);
                 Snackbar.make(content, "Click btn" + position, Snackbar.LENGTH_SHORT).show();
             }
         });
