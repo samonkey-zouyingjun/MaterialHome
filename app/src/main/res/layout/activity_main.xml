@@ -36,7 +36,7 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <com.antonioleiva.materializeyourapp.widgets.GridRecyclerView
+            <com.hfs.materialhome.widgets.GridRecyclerView
                 android:id="@+id/recycler"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

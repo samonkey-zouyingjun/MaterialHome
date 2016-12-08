@@ -39,7 +39,7 @@
             app:expandedTitleMarginStart="48dp"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
-            <com.antonioleiva.materializeyourapp.widgets.SquareImageView
+            <com.hfs.materialhome.widgets.SquareImageView
                 android:id="@+id/image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
                     <!--android:layout_margin="@dimen/spacing_large"-->
                     <!--android:text="@string/lorem_ipsum"-->
                     <!--android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>-->
-                    <com.antonioleiva.materializeyourapp.widgets.ExpandableTextView
+                    <com.hfs.materialhome.widgets.ExpandableTextView
                         android:id="@+id/description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
