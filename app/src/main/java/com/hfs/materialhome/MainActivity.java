@@ -121,7 +121,8 @@ public class MainActivity extends AppCompatActivity implements RecyclerViewAdapt
     }
 
     private void initView() {
-        mSwipeRefresh.setColorSchemeResources(android.R.color.holo_red_light, android.R.color.holo_blue_bright, android.R.color.holo_orange_light);
+        mSwipeRefresh.setColorSchemeResources(android.R.color.holo_red_light,
+                android.R.color.holo_blue_bright, android.R.color.holo_orange_light);
         mSwipeRefresh.post(new Runnable() {
             @Override
             public void run() {
